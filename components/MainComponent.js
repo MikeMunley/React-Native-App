@@ -326,22 +326,39 @@ class Main extends Component {
         this.props.fetchComments();
         this.props.fetchPromotions();
         this.props.fetchPartners();
-
-        NetInfo.fetch().then(connectionInfo => {
-            (Platform.OS === 'ios')
-                ? Alert.alert('Initial Network Connectivity Type:', connectionInfo.type)
-                : ToastAndroid.show('Initial Network Connectivity Type: ' +
-                    connectionInfo.type, ToastAndroid.LONG);
-        });
+        this.showNetInfo();
 
         this.unsubscribeNetInfo = NetInfo.addEventListener(connectionInfo => {
             this.handleConnectivityChange(connectionInfo);
-        });
-    }
+            });
+        }
+        
+        async showNetInfo() {
+            const connectionInfo = await NetInfo.fetch();
+            
+                (Platform.OS === 'ios')
+                    ? Alert.alert('Initial Network Connectivity Type:', connectionInfo.type)
+                    : ToastAndroid.show('Initial Network Connectivity Type: ' +
+                        connectionInfo.type, ToastAndroid.LONG);
+        }
 
-    componentWillUnmount() {
-        this.unsubscribeNetInfo();
-    }
+        componentWillUnmount() {
+                this.unsubscribeNetInfo();
+            }
+
+        processImage = async (imgUri) =>   {
+            const processedImage = await ImageManipulator.manipulateAsync(imgUri, [{resize: {
+                width: 400
+            }}], { format: ImageManipulator.SaveFormat.PNG} )
+            console.log(processedImage);
+            if (processedImage) {
+                this.setState({imageUrl: processedImage.uri})
+            }
+        }
+
+        
+
+    
     
     handleConnectivityChange = connectionInfo => {
         let connectionMsg = 'You are now connected to an active network.';
